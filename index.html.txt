@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Skewb Timer</title>
+  <style>
+    body {
+      margin: 0;
+      background: #111;
+      color: #0f0;
+      font-family: monospace;
+      display: flex;
+      flex-direction: row;
+      height: 100vh;
+    }
+    #painel {
+      width: 250px;
+      padding: 20px;
+      border-right: 1px solid #0f0;
+      overflow-y: auto;
+    }
+    #main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+    #scramble {
+      color: #0f0;
+      font-size: 24px;
+      padding: 10px;
+    }
+    #timer {
+      font-size: 120px;
+      color: #0f0;
+    }
+    .media {
+      color: #0ff;
+      font-size: 24px;
+    }
+    #botoes {
+      margin-top: 10px;
+    }
+    button {
+      font-size: 16px;
+      padding: 5px 15px;
+      margin: 5px;
+    }
+    .tempo {
+      font-size: 18px;
+    }
+  </style>
+</head>
+<body>
+  <div id="painel">
+    <h3>Tempos</h3>
+    <div id="tempos"></div>
+  </div>
+
+  <div id="main">
+    <div id="scramble">Clique em "Próximo scramble"</div>
+    <div id="timer">0.00</div>
+    <div class="media" id="ao5">ao5: --</div>
+    <div class="media" id="ao12">ao12: --</div>
+    <div id="botoes">
+      <button onclick="gerarScramble()">Próximo scramble</button>
+      <button onclick="resetar()">Resetar</button>
+    </div>
+  </div>
+
+  <script>
+    const setups = {
+      "U1": "H z (S z S)",
+      "U2": "S z' S z' H",
+      "U3": "H z' S z' S",
+      "U4": "(S z S) z H",
+      "U5": "(H z' H) z' S",
+      "U6": "S z H z H",
+      "U7": "H z H z S",
+      "U8": "S z' (H z' H)"
+    };
+
+    let tempos = [];
+    let timerInterval;
+    let tempoInicial;
+    let rodando = false;
+
+    document.addEventListener("keydown", (e) => {
+      if (e.code === "Space") {
+        e.preventDefault();
+        if (!rodando) iniciarTimer();
+        else pararTimer();
+      }
+    });
+
+    function iniciarTimer() {
+      rodando = true;
+      tempoInicial = Date.now();
+      timerInterval = setInterval(() => {
+        const tempo = ((Date.now() - tempoInicial) / 1000).toFixed(2);
+        document.getElementById("timer").textContent = tempo;
+      }, 10);
+    }
+
+    function pararTimer() {
+      rodando = false;
+      clearInterval(timerInterval);
+      const tempo = ((Date.now() - tempoInicial) / 1000).toFixed(2);
+      tempos.unshift(parseFloat(tempo));
+      atualizarTempos();
+    }
+
+    function atualizarTempos() {
+      const lista = document.getElementById("tempos");
+      lista.innerHTML = tempos.map((t, i) => `<div class="tempo">${i+1}. ${t.toFixed(2)}</div>`).join("");
+      atualizarMedia("ao5", 5);
+      atualizarMedia("ao12", 12);
+    }
+
+    function atualizarMedia(id, n) {
+      const recentes = tempos.slice(0, n);
+      if (recentes.length < n) {
+        document.getElementById(id).textContent = `${id}: --`;
+        return;
+      }
+      const media = (recentes.reduce((a, b) => a + b, 0) / n).toFixed(2);
+      document.getElementById(id).textContent = `${id}: ${media}`;
+    }
+
+    function gerarScramble() {
+      const chaves = Object.keys(setups);
+      const caso = chaves[Math.floor(Math.random() * chaves.length)];
+      document.getElementById("scramble").textContent = `${caso}: ${setups[caso]}`;
+    }
+
+    function resetar() {
+      tempos = [];
+      document.getElementById("tempos").innerHTML = "";
+      document.getElementById("timer").textContent = "0.00";
+      document.getElementById("ao5").textContent = "ao5: --";
+      document.getElementById("ao12").textContent = "ao12: --";
+    }
+  </script>
+</body>
+</html>
