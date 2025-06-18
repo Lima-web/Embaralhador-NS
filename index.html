@@ -1,24 +1,26 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
-  <title>Skewb Timer</title>
+  <meta charset="UTF-8" />
+  <title>Skewb Embaralhador</title>
   <style>
     body {
       margin: 0;
-      background: #111;
+      background-color: #111;
       color: #0f0;
       font-family: monospace;
       display: flex;
       flex-direction: row;
       height: 100vh;
     }
+
     #painel {
       width: 250px;
       padding: 20px;
       border-right: 1px solid #0f0;
       overflow-y: auto;
     }
+
     #main {
       flex: 1;
       display: flex;
@@ -26,29 +28,39 @@
       align-items: center;
       justify-content: center;
     }
+
     #scramble {
-      color: #0f0;
       font-size: 24px;
       padding: 10px;
-    }
-    #timer {
-      font-size: 120px;
+      text-align: center;
       color: #0f0;
     }
+
+    #timer {
+      font-size: 100px;
+      padding: 20px;
+      color: #0f0;
+    }
+
     .media {
+      font-size: 20px;
       color: #0ff;
-      font-size: 24px;
     }
+
     #botoes {
-      margin-top: 10px;
+      margin-top: 15px;
     }
+
     button {
       font-size: 16px;
-      padding: 5px 15px;
+      padding: 8px 12px;
       margin: 5px;
+      cursor: pointer;
     }
+
     .tempo {
       font-size: 18px;
+      margin-bottom: 5px;
     }
   </style>
 </head>
@@ -59,12 +71,12 @@
   </div>
 
   <div id="main">
-    <div id="scramble">Clique em "Próximo scramble"</div>
+    <div id="scramble">Clique em "Próximo Scramble"</div>
     <div id="timer">0.00</div>
     <div class="media" id="ao5">ao5: --</div>
     <div class="media" id="ao12">ao12: --</div>
     <div id="botoes">
-      <button onclick="gerarScramble()">Próximo scramble</button>
+      <button onclick="gerarScramble()">Próximo Scramble</button>
       <button onclick="resetar()">Resetar</button>
     </div>
   </div>
@@ -82,56 +94,38 @@
     };
 
     let tempos = [];
-    let timerInterval;
-    let tempoInicial;
     let rodando = false;
+    let inicio;
+    let intervalo;
 
-    document.addEventListener("keydown", (e) => {
+    document.addEventListener("keydown", function (e) {
       if (e.code === "Space") {
         e.preventDefault();
-        if (!rodando) iniciarTimer();
-        else pararTimer();
+        rodando ? parar() : iniciar();
       }
     });
 
-    function iniciarTimer() {
+    function iniciar() {
       rodando = true;
-      tempoInicial = Date.now();
-      timerInterval = setInterval(() => {
-        const tempo = ((Date.now() - tempoInicial) / 1000).toFixed(2);
+      inicio = Date.now();
+      intervalo = setInterval(() => {
+        const tempo = ((Date.now() - inicio) / 1000).toFixed(2);
         document.getElementById("timer").textContent = tempo;
       }, 10);
     }
 
-    function pararTimer() {
+    function parar() {
       rodando = false;
-      clearInterval(timerInterval);
-      const tempo = ((Date.now() - tempoInicial) / 1000).toFixed(2);
-      tempos.unshift(parseFloat(tempo));
-      atualizarTempos();
-    }
-
-    function atualizarTempos() {
-      const lista = document.getElementById("tempos");
-      lista.innerHTML = tempos.map((t, i) => `<div class="tempo">${i+1}. ${t.toFixed(2)}</div>`).join("");
-      atualizarMedia("ao5", 5);
-      atualizarMedia("ao12", 12);
-    }
-
-    function atualizarMedia(id, n) {
-      const recentes = tempos.slice(0, n);
-      if (recentes.length < n) {
-        document.getElementById(id).textContent = `${id}: --`;
-        return;
-      }
-      const media = (recentes.reduce((a, b) => a + b, 0) / n).toFixed(2);
-      document.getElementById(id).textContent = `${id}: ${media}`;
+      clearInterval(intervalo);
+      const tempoFinal = ((Date.now() - inicio) / 1000).toFixed(2);
+      tempos.unshift(parseFloat(tempoFinal));
+      atualizarLista();
     }
 
     function gerarScramble() {
       const chaves = Object.keys(setups);
-      const caso = chaves[Math.floor(Math.random() * chaves.length)];
-      document.getElementById("scramble").textContent = `${caso}: ${setups[caso]}`;
+      const chave = chaves[Math.floor(Math.random() * chaves.length)];
+      document.getElementById("scramble").textContent = `${chave}: ${setups[chave]}`;
     }
 
     function resetar() {
@@ -140,6 +134,27 @@
       document.getElementById("timer").textContent = "0.00";
       document.getElementById("ao5").textContent = "ao5: --";
       document.getElementById("ao12").textContent = "ao12: --";
+    }
+
+    function atualizarLista() {
+      const div = document.getElementById("tempos");
+      div.innerHTML = tempos
+        .map((t, i) => `<div class="tempo">${i + 1}. ${t.toFixed(2)}s</div>`)
+        .join("");
+      calcularMedia("ao5", 5);
+      calcularMedia("ao12", 12);
+    }
+
+    function calcularMedia(id, n) {
+      const recentes = tempos.slice(0, n);
+      if (recentes.length < n) {
+        document.getElementById(id).textContent = `${id}: --`;
+        return;
+      }
+      const media = (
+        recentes.reduce((soma, val) => soma + val, 0) / n
+      ).toFixed(2);
+      document.getElementById(id).textContent = `${id}: ${media}s`;
     }
   </script>
 </body>
