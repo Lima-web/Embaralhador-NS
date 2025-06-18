@@ -42,6 +42,10 @@
       color: #0f0;
     }
 
+    #timer.segurar {
+      color: red;
+    }
+
     .media {
       font-size: 20px;
       color: #0ff;
@@ -61,6 +65,10 @@
     .tempo {
       font-size: 18px;
       margin-bottom: 5px;
+    }
+
+    .oculto {
+      display: none;
     }
   </style>
 </head>
@@ -97,17 +105,41 @@
     let rodando = false;
     let inicio;
     let intervalo;
+    let segurando = false;
+    let tempoPressionado;
+    let pronto = false;
 
     document.addEventListener("keydown", function (e) {
+      if (e.code === "Space" && !segurando) {
+        segurando = true;
+        tempoPressionado = Date.now();
+        document.getElementById("timer").classList.add("segurar");
+
+        setTimeout(() => {
+          if (segurando) pronto = true;
+        }, 1000);
+      }
+    });
+
+    document.addEventListener("keyup", function (e) {
       if (e.code === "Space") {
-        e.preventDefault();
-        rodando ? parar() : iniciar();
+        document.getElementById("timer").classList.remove("segurar");
+
+        if (rodando) {
+          parar();
+        } else if (pronto) {
+          iniciar();
+        }
+
+        segurando = false;
+        pronto = false;
       }
     });
 
     function iniciar() {
       rodando = true;
       inicio = Date.now();
+      ocultarElementos(true);
       intervalo = setInterval(() => {
         const tempo = ((Date.now() - inicio) / 1000).toFixed(2);
         document.getElementById("timer").textContent = tempo;
@@ -120,6 +152,7 @@
       const tempoFinal = ((Date.now() - inicio) / 1000).toFixed(2);
       tempos.unshift(parseFloat(tempoFinal));
       atualizarLista();
+      ocultarElementos(false);
     }
 
     function gerarScramble() {
@@ -139,7 +172,7 @@
     function atualizarLista() {
       const div = document.getElementById("tempos");
       div.innerHTML = tempos
-        .map((t, i) => `<div class="tempo">${i + 1}. ${t.toFixed(2)}s</div>`)
+        .map((t, i) => `<div class="tempo">${tempos.length - i}. ${t.toFixed(2)}s</div>`)
         .join("");
       calcularMedia("ao5", 5);
       calcularMedia("ao12", 12);
@@ -155,6 +188,13 @@
         recentes.reduce((soma, val) => soma + val, 0) / n
       ).toFixed(2);
       document.getElementById(id).textContent = `${id}: ${media}s`;
+    }
+
+    function ocultarElementos(ocultar) {
+      const ids = ["scramble", "ao5", "ao12", "botoes"];
+      ids.forEach(id => {
+        document.getElementById(id).classList.toggle("oculto", ocultar);
+      });
     }
   </script>
 </body>
