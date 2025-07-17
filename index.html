@@ -47,8 +47,9 @@
     }
 
     .media {
-      font-size: 20px;
+      font-size: 16px;
       color: #0ff;
+      margin-bottom: 5px;
     }
 
     #botoes {
@@ -75,14 +76,20 @@
 <body>
   <div id="painel">
     <h3>Tempos</h3>
+    <div id="medias">
+      <div class="media" id="mo3">mo3 atual: -- | melhor: --</div>
+      <div class="media" id="ao5">ao5 atual: -- | melhor: --</div>
+      <div class="media" id="ao12">ao12 atual: -- | melhor: --</div>
+      <div class="media" id="ao50">ao50 atual: -- | melhor: --</div>
+      <div class="media" id="ao100">ao100 atual: -- | melhor: --</div>
+      <div class="media" id="total">Total: 0/0</div>
+    </div>
     <div id="tempos"></div>
   </div>
 
   <div id="main">
     <div id="scramble"></div>
     <div id="timer">0.00</div>
-    <div class="media" id="ao5">ao5: --</div>
-    <div class="media" id="ao12">ao12: --</div>
     <div id="botoes">
       <button onclick="gerarScramble()">Próximo Scramble</button>
       <button onclick="resetar()">Resetar</button>
@@ -106,13 +113,13 @@
     let inicio;
     let intervalo;
     let segurando = false;
-    let tempoPressionado;
     let pronto = false;
+
+    const melhores = { mo3: Infinity, ao5: Infinity, ao12: Infinity, ao50: Infinity, ao100: Infinity };
 
     document.addEventListener("keydown", function (e) {
       if (e.code === "Space" && !segurando) {
         segurando = true;
-        tempoPressionado = Date.now();
         document.getElementById("timer").classList.add("segurar");
 
         setTimeout(() => {
@@ -152,6 +159,8 @@
       const tempoFinal = ((Date.now() - inicio) / 1000).toFixed(2);
       tempos.unshift(parseFloat(tempoFinal));
       atualizarLista();
+      atualizarMedias();
+      atualizarTotal();
       ocultarElementos(false);
       gerarScramble();
     }
@@ -165,9 +174,9 @@
     function resetar() {
       tempos = [];
       document.getElementById("tempos").innerHTML = "";
+      atualizarMedias();
+      atualizarTotal();
       document.getElementById("timer").textContent = "0.00";
-      document.getElementById("ao5").textContent = "ao5: --";
-      document.getElementById("ao12").textContent = "ao12: --";
     }
 
     function atualizarLista() {
@@ -175,30 +184,42 @@
       div.innerHTML = tempos
         .map((t, i) => `<div class="tempo">${tempos.length - i}. ${t.toFixed(2)}s</div>`)
         .join("");
+    }
+
+    function atualizarMedias() {
+      calcularMedia("mo3", 3);
       calcularMedia("ao5", 5);
       calcularMedia("ao12", 12);
+      calcularMedia("ao50", 50);
+      calcularMedia("ao100", 100);
     }
 
     function calcularMedia(id, n) {
       const recentes = tempos.slice(0, n);
+      const el = document.getElementById(id);
       if (recentes.length < n) {
-        document.getElementById(id).textContent = `${id}: --`;
+        el.textContent = `${id} atual: -- | melhor: ${melhores[id] !== Infinity ? melhores[id].toFixed(2) + 's' : '--'}`;
         return;
       }
       const media = (
         recentes.reduce((soma, val) => soma + val, 0) / n
       ).toFixed(2);
-      document.getElementById(id).textContent = `${id}: ${media}s`;
+      if (parseFloat(media) < melhores[id]) melhores[id] = parseFloat(media);
+      el.textContent = `${id} atual: ${media}s | melhor: ${melhores[id].toFixed(2)}s`;
+    }
+
+    function atualizarTotal() {
+      const el = document.getElementById("total");
+      el.textContent = `Total: ${tempos.length}/${tempos.length}`;
     }
 
     function ocultarElementos(ocultar) {
-      const ids = ["scramble", "ao5", "ao12", "botoes"];
+      const ids = ["scramble", "medias", "botoes"];
       ids.forEach(id => {
         document.getElementById(id).classList.toggle("oculto", ocultar);
       });
     }
 
-    // Gera um scramble ao carregar a página
     window.onload = gerarScramble;
   </script>
 </body>
