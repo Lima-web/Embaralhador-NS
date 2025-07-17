@@ -32,14 +32,23 @@
       color: #0f0;
       font-weight: bold;
       margin-bottom: 5px;
+      font-size: 18px;
+      text-transform: uppercase;
     }
 
     .media-line {
       display: flex;
-      justify-content: space-between;
-      font-size: 14px;
+      flex-direction: column;
+      font-size: 16px;
+      margin-bottom: 5px;
+    }
+
+    .media-atual {
       color: #0ff;
-      margin-bottom: 3px;
+    }
+
+    .media-melhor {
+      color: #0f0;
     }
 
     #tempos {
@@ -100,12 +109,27 @@
   <div id="painel">
     <div id="medias">
       <div class="titulo">Médias</div>
-      <div class="media-line" id="mo3">mo3 atual: -- | melhor: --</div>
-      <div class="media-line" id="ao5">ao5 atual: -- | melhor: --</div>
-      <div class="media-line" id="ao12">ao12 atual: -- | melhor: --</div>
-      <div class="media-line" id="ao50">ao50 atual: -- | melhor: --</div>
-      <div class="media-line" id="ao100">ao100 atual: -- | melhor: --</div>
-      <div class="media-line" id="total">Total: 0/0</div>
+      <div class="media-line">
+        <span class="media-atual" id="mo3-atual">mo3 atual: --</span>
+        <span class="media-melhor" id="mo3-melhor">melhor: --</span>
+      </div>
+      <div class="media-line">
+        <span class="media-atual" id="ao5-atual">ao5 atual: --</span>
+        <span class="media-melhor" id="ao5-melhor">melhor: --</span>
+      </div>
+      <div class="media-line">
+        <span class="media-atual" id="ao12-atual">ao12 atual: --</span>
+        <span class="media-melhor" id="ao12-melhor">melhor: --</span>
+      </div>
+      <div class="media-line">
+        <span class="media-atual" id="ao50-atual">ao50 atual: --</span>
+        <span class="media-melhor" id="ao50-melhor">melhor: --</span>
+      </div>
+      <div class="media-line">
+        <span class="media-atual" id="ao100-atual">ao100 atual: --</span>
+        <span class="media-melhor" id="ao100-melhor">melhor: --</span>
+      </div>
+      <div class="titulo" id="total">Total: 0/0</div>
     </div>
     <div class="titulo">Tempos</div>
     <div id="tempos"></div>
@@ -220,16 +244,23 @@
 
     function calcularMedia(id, n) {
       const recentes = tempos.slice(0, n);
-      const el = document.getElementById(id);
+      const atualEl = document.getElementById(id + "-atual");
+      const melhorEl = document.getElementById(id + "-melhor");
+
       if (recentes.length < n) {
-        el.textContent = `${id} atual: -- | melhor: ${melhores[id] !== Infinity ? melhores[id].toFixed(2) + 's' : '--'}`;
+        atualEl.textContent = `${id} atual: --`;
+        melhorEl.textContent = `melhor: ${melhores[id] !== Infinity ? melhores[id].toFixed(2) + 's' : '--'}`;
         return;
       }
+
       const media = (
         recentes.reduce((soma, val) => soma + val, 0) / n
       ).toFixed(2);
+
       if (parseFloat(media) < melhores[id]) melhores[id] = parseFloat(media);
-      el.textContent = `${id} atual: ${media}s | melhor: ${melhores[id].toFixed(2)}s`;
+
+      atualEl.textContent = `${id} atual: ${media}s`;
+      melhorEl.textContent = `melhor: ${melhores[id].toFixed(2)}s`;
     }
 
     function atualizarTotal() {
