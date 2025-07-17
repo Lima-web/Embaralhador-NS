@@ -158,7 +158,7 @@
     function gerarScramble() {
       const chaves = Object.keys(setups);
       const chave = chaves[Math.floor(Math.random() * chaves.length)];
-      document.getElementById("scramble").textContent = `${chave}: ${setups[chave]}`;
+      document.getElementById("scramble").textContent = setups[chave];
     }
 
     function resetar() {
