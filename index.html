@@ -2,280 +2,235 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
-  <title>Skewb Embaralhador</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Embaralhador Skewb - Peanut</title>
   <style>
     body {
-      margin: 0;
-      background-color: #111;
-      color: #0f0;
       font-family: monospace;
-      display: flex;
-      flex-direction: row;
-      height: 100vh;
+      background-color: #000;
+      color: #00ff00;
+      text-align: center;
+      margin: 0;
+      padding: 0;
     }
 
-    #painel {
-      width: 300px;
-      padding: 20px;
-      border-right: 1px solid #0f0;
-      display: flex;
-      flex-direction: column;
-    }
-
-    #medias {
-      margin-bottom: 10px;
-      border-bottom: 1px solid #0f0;
-      padding-bottom: 10px;
-    }
-
-    .titulo {
-      color: #0f0;
-      font-weight: bold;
-      margin-bottom: 5px;
-      font-size: 18px;
-      text-transform: uppercase;
-    }
-
-    .media-line {
-      display: flex;
-      flex-direction: column;
-      font-size: 16px;
-      margin-bottom: 5px;
-    }
-
-    .media-atual {
-      color: #0ff;
-    }
-
-    .media-melhor {
-      color: #0f0;
-    }
-
-    #tempos {
-      flex: 1;
-      overflow-y: auto;
-      border-top: 1px solid #0f0;
-      padding-top: 10px;
-    }
-
-    #main {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
+    h1 {
+      margin-top: 20px;
     }
 
     #scramble {
       font-size: 24px;
-      padding: 10px;
-      text-align: center;
+      margin-top: 40px;
       color: #0f0;
     }
 
     #timer {
       font-size: 100px;
+      margin-top: 60px;
+      transition: color 0.3s;
+    }
+
+    #controls {
+      position: absolute;
+      top: 10px;
+      right: 15px;
+    }
+
+    #configBtn {
+      font-size: 22px;
+      cursor: pointer;
+      background: none;
+      border: none;
+      color: #00ff00;
+    }
+
+    /* Modal */
+    #configModal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0,0,0,0.85);
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+    }
+
+    .modal-content {
+      background-color: #111;
+      border: 2px solid #0f0;
+      border-radius: 10px;
+      width: 90%;
+      max-width: 600px;
       padding: 20px;
+      max-height: 80vh;
+      overflow-y: auto;
+      text-align: left;
+    }
+
+    .category {
+      border-bottom: 1px solid #0f0;
+      margin-bottom: 10px;
+      padding-bottom: 10px;
+    }
+
+    .category h3 {
       color: #0f0;
+      margin-top: 10px;
     }
 
-    #timer.segurar {
-      color: red;
-    }
-
-    #botoes {
-      margin-top: 15px;
+    .case-item {
+      margin-left: 15px;
     }
 
     button {
-      font-size: 16px;
-      padding: 8px 12px;
-      margin: 5px;
+      background-color: #0f0;
+      color: #000;
+      border: none;
+      padding: 5px 10px;
       cursor: pointer;
+      font-weight: bold;
+      margin: 5px;
+      border-radius: 5px;
     }
 
-    .tempo {
-      font-size: 18px;
-      margin-bottom: 5px;
-      white-space: nowrap;
-    }
-
-    .oculto {
-      display: none;
+    button:hover {
+      background-color: #00cc00;
     }
   </style>
 </head>
 <body>
-  <div id="painel">
-    <div id="medias">
-      <div class="titulo">Médias</div>
-      <div class="media-line">
-        <span class="media-atual" id="mo3-atual">mo3 atual: --</span>
-        <span class="media-melhor" id="mo3-melhor">melhor: --</span>
-      </div>
-      <div class="media-line">
-        <span class="media-atual" id="ao5-atual">ao5 atual: --</span>
-        <span class="media-melhor" id="ao5-melhor">melhor: --</span>
-      </div>
-      <div class="media-line">
-        <span class="media-atual" id="ao12-atual">ao12 atual: --</span>
-        <span class="media-melhor" id="ao12-melhor">melhor: --</span>
-      </div>
-      <div class="media-line">
-        <span class="media-atual" id="ao50-atual">ao50 atual: --</span>
-        <span class="media-melhor" id="ao50-melhor">melhor: --</span>
-      </div>
-      <div class="media-line">
-        <span class="media-atual" id="ao100-atual">ao100 atual: --</span>
-        <span class="media-melhor" id="ao100-melhor">melhor: --</span>
-      </div>
-      <div class="titulo" id="total">Total: 0/0</div>
-    </div>
-    <div class="titulo">Tempos</div>
-    <div id="tempos"></div>
+  <div id="controls">
+    <button id="configBtn">⚙️</button>
   </div>
 
-  <div id="main">
-    <div id="scramble"></div>
-    <div id="timer">0.00</div>
-    <div id="botoes">
-      <button onclick="gerarScramble()">Próximo Scramble</button>
-      <button onclick="resetar()">Resetar</button>
+  <h1>Embaralhador Skewb</h1>
+  <div id="scramble"></div>
+  <div id="timer">0.00</div>
+
+  <!-- Modal de configuração -->
+  <div id="configModal">
+    <div class="modal-content">
+      <h2>Configurações de Scrambles</h2>
+      <div class="category" id="peanut">
+        <h3>Peanut</h3>
+        <button onclick="selectAll('peanut')">Selecionar tudo</button>
+        <button onclick="clearAll('peanut')">Limpar tudo</button>
+        <div id="peanutCases">
+          <label class="case-item"><input type="checkbox" value="U1" checked> U1</label><br>
+          <label class="case-item"><input type="checkbox" value="U2" checked> U2</label><br>
+          <label class="case-item"><input type="checkbox" value="U3" checked> U3</label><br>
+          <label class="case-item"><input type="checkbox" value="U4" checked> U4</label><br>
+          <label class="case-item"><input type="checkbox" value="U5" checked> U5</label><br>
+          <label class="case-item"><input type="checkbox" value="U6" checked> U6</label><br>
+          <label class="case-item"><input type="checkbox" value="U7" checked> U7</label><br>
+          <label class="case-item"><input type="checkbox" value="U8" checked> U8</label><br>
+        </div>
+      </div>
+      <div style="text-align:center;">
+        <button onclick="closeConfig()">OK</button>
+      </div>
     </div>
   </div>
 
   <script>
-    const setups = {
-      "U1": "H z (S z S)",
-      "U2": "S z' S z' H",
-      "U3": "H z' S z' S",
-      "U4": "(S z S) z H",
-      "U5": "(H z' H) z' S",
-      "U6": "S z H z H",
-      "U7": "H z H z S",
-      "U8": "S z' (H z' H)"
+    const scrambles = {
+      U1: "R' U R U'",
+      U2: "L U' L' U",
+      U3: "R U' R' U2",
+      U4: "L' U2 L U'",
+      U5: "R' U2 R U",
+      U6: "L U2 L' U'",
+      U7: "R' U' R U'",
+      U8: "L U L' U"
     };
 
-    let tempos = [];
-    let rodando = false;
-    let inicio;
-    let intervalo;
-    let segurando = false;
-    let pronto = false;
+    let enabledCases = Object.keys(scrambles);
 
-    const melhores = { mo3: Infinity, ao5: Infinity, ao12: Infinity, ao50: Infinity, ao100: Infinity };
+    const scrambleDiv = document.getElementById('scramble');
+    const timerDiv = document.getElementById('timer');
+    const configModal = document.getElementById('configModal');
 
-    document.addEventListener("keydown", function (e) {
-      if (e.code === "Space" && !segurando) {
-        segurando = true;
-        document.getElementById("timer").classList.add("segurar");
+    // Mostrar primeiro scramble ao carregar
+    window.onload = () => {
+      generateScramble();
+    };
 
-        setTimeout(() => {
-          if (segurando) pronto = true;
-        }, 1000);
-      }
-    });
+    // Timer
+    let startTime, timerInterval, holding = false, ready = false;
 
-    document.addEventListener("keyup", function (e) {
-      if (e.code === "Space") {
-        document.getElementById("timer").classList.remove("segurar");
-
-        if (rodando) {
-          parar();
-        } else if (pronto) {
-          iniciar();
+    document.body.addEventListener('keydown', (e) => {
+      if (e.code === 'Space') {
+        e.preventDefault();
+        if (!holding) {
+          holding = true;
+          timerDiv.style.color = 'red';
+          setTimeout(() => {
+            if (holding) ready = true;
+          }, 1000);
         }
-
-        segurando = false;
-        pronto = false;
       }
     });
 
-    function iniciar() {
-      rodando = true;
-      inicio = Date.now();
-      ocultarElementos(true);
-      intervalo = setInterval(() => {
-        const tempo = ((Date.now() - inicio) / 1000).toFixed(2);
-        document.getElementById("timer").textContent = tempo;
-      }, 10);
-    }
-
-    function parar() {
-      rodando = false;
-      clearInterval(intervalo);
-      const tempoFinal = ((Date.now() - inicio) / 1000).toFixed(2);
-      tempos.unshift(parseFloat(tempoFinal));
-      atualizarLista();
-      atualizarMedias();
-      atualizarTotal();
-      ocultarElementos(false);
-      gerarScramble();
-    }
-
-    function gerarScramble() {
-      const chaves = Object.keys(setups);
-      const chave = chaves[Math.floor(Math.random() * chaves.length)];
-      document.getElementById("scramble").textContent = setups[chave];
-    }
-
-    function resetar() {
-      tempos = [];
-      document.getElementById("tempos").innerHTML = "";
-      atualizarMedias();
-      atualizarTotal();
-      document.getElementById("timer").textContent = "0.00";
-    }
-
-    function atualizarLista() {
-      const div = document.getElementById("tempos");
-      div.innerHTML = tempos
-        .map((t, i) => `<div class="tempo">${tempos.length - i}. ${t.toFixed(2)}s</div>`)
-        .join("");
-    }
-
-    function atualizarMedias() {
-      calcularMedia("mo3", 3);
-      calcularMedia("ao5", 5);
-      calcularMedia("ao12", 12);
-      calcularMedia("ao50", 50);
-      calcularMedia("ao100", 100);
-    }
-
-    function calcularMedia(id, n) {
-      const recentes = tempos.slice(0, n);
-      const atualEl = document.getElementById(id + "-atual");
-      const melhorEl = document.getElementById(id + "-melhor");
-
-      if (recentes.length < n) {
-        atualEl.textContent = `${id} atual: --`;
-        melhorEl.textContent = `melhor: ${melhores[id] !== Infinity ? melhores[id].toFixed(2) + 's' : '--'}`;
-        return;
+    document.body.addEventListener('keyup', (e) => {
+      if (e.code === 'Space') {
+        e.preventDefault();
+        if (ready) {
+          startTimer();
+        }
+        holding = false;
+        ready = false;
       }
+    });
 
-      const media = (
-        recentes.reduce((soma, val) => soma + val, 0) / n
-      ).toFixed(2);
-
-      if (parseFloat(media) < melhores[id]) melhores[id] = parseFloat(media);
-
-      atualEl.textContent = `${id} atual: ${media}s`;
-      melhorEl.textContent = `melhor: ${melhores[id].toFixed(2)}s`;
+    function startTimer() {
+      timerDiv.style.color = '#00ff00';
+      startTime = Date.now();
+      timerInterval = setInterval(() => {
+        const elapsed = (Date.now() - startTime) / 1000;
+        timerDiv.textContent = elapsed.toFixed(2);
+      }, 10);
+      document.body.addEventListener('keydown', stopTimerOnce);
     }
 
-    function atualizarTotal() {
-      const el = document.getElementById("total");
-      el.textContent = `Total: ${tempos.length}/${tempos.length}`;
+    function stopTimerOnce(e) {
+      if (e.code === 'Space') {
+        clearInterval(timerInterval);
+        document.body.removeEventListener('keydown', stopTimerOnce);
+        setTimeout(generateScramble, 300);
+      }
     }
 
-    function ocultarElementos(ocultar) {
-      const ids = ["scramble", "medias", "botoes"];
-      ids.forEach(id => {
-        document.getElementById(id).classList.toggle("oculto", ocultar);
+    function generateScramble() {
+      const active = enabledCases;
+      const randomCase = active[Math.floor(Math.random() * active.length)];
+      scrambleDiv.textContent = scrambles[randomCase];
+    }
+
+    // Modal
+    document.getElementById('configBtn').onclick = () => {
+      configModal.style.display = 'flex';
+    };
+
+    function closeConfig() {
+      configModal.style.display = 'none';
+      const selected = [];
+      document.querySelectorAll('#peanutCases input[type="checkbox"]').forEach(cb => {
+        if (cb.checked) selected.push(cb.value);
       });
+      enabledCases = selected;
+      generateScramble();
     }
 
-    window.onload = gerarScramble;
+    function selectAll(cat) {
+      document.querySelectorAll(`#${cat}Cases input[type="checkbox"]`).forEach(cb => cb.checked = true);
+    }
+
+    function clearAll(cat) {
+      document.querySelectorAll(`#${cat}Cases input[type="checkbox"]`).forEach(cb => cb.checked = false);
+    }
   </script>
 </body>
 </html>
