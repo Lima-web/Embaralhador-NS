@@ -12,6 +12,48 @@
       text-align: center;
       margin: 0;
       padding: 0;
+      display: flex;
+      flex-direction: row;
+      justify-content: center;
+      align-items: flex-start;
+      height: 100vh;
+    }
+
+    /* Lista de tempos */
+    #timesList {
+      width: 200px;
+      height: 100vh;
+      background-color: #050505;
+      border-right: 2px solid #00ff00;
+      overflow-y: auto;
+      text-align: left;
+      padding: 10px;
+      box-sizing: border-box;
+    }
+
+    #timesList h3 {
+      color: #0f0;
+      text-align: center;
+      margin-top: 10px;
+    }
+
+    #timesList ul {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+
+    #timesList li {
+      margin: 5px 0;
+      border-bottom: 1px dashed #0f0;
+      padding-bottom: 3px;
+    }
+
+    /* Área principal */
+    #main {
+      flex-grow: 1;
+      text-align: center;
+      position: relative;
     }
 
     h1 {
@@ -19,9 +61,10 @@
     }
 
     #scramble {
-      font-size: 24px;
+      font-size: 22px;
       margin-top: 40px;
       color: #0f0;
+      white-space: pre-wrap;
     }
 
     #timer {
@@ -102,13 +145,20 @@
   </style>
 </head>
 <body>
-  <div id="controls">
-    <button id="configBtn">⚙️</button>
+  <div id="timesList">
+    <h3>Tempos</h3>
+    <ul id="times"></ul>
   </div>
 
-  <h1>Embaralhador Skewb</h1>
-  <div id="scramble"></div>
-  <div id="timer">0.00</div>
+  <div id="main">
+    <div id="controls">
+      <button id="configBtn">⚙️</button>
+    </div>
+
+    <h1>Embaralhador Skewb</h1>
+    <div id="scramble"></div>
+    <div id="timer">0.00</div>
+  </div>
 
   <!-- Modal de configuração -->
   <div id="configModal">
@@ -137,23 +187,23 @@
 
   <script>
     const scrambles = {
-      U1: "R' U R U'",
-      U2: "L U' L' U",
-      U3: "R U' R' U2",
-      U4: "L' U2 L U'",
-      U5: "R' U2 R U",
-      U6: "L U2 L' U'",
-      U7: "R' U' R U'",
-      U8: "L U L' U"
+      U1: "H z (S z S)",
+      U2: "S z' S z' H",
+      U3: "H z' S z' S",
+      U4: "(S z S) z H",
+      U5: "(H z' H) z' S",
+      U6: "S z H z H",
+      U7: "H z H z S",
+      U8: "S z' (H z' H)"
     };
 
     let enabledCases = Object.keys(scrambles);
-
+    const times = [];
     const scrambleDiv = document.getElementById('scramble');
     const timerDiv = document.getElementById('timer');
+    const timesList = document.getElementById('times');
     const configModal = document.getElementById('configModal');
 
-    // Mostrar primeiro scramble ao carregar
     window.onload = () => {
       generateScramble();
     };
@@ -198,14 +248,28 @@
     function stopTimerOnce(e) {
       if (e.code === 'Space') {
         clearInterval(timerInterval);
+        const finalTime = ((Date.now() - startTime) / 1000).toFixed(2);
+        addTime(finalTime);
         document.body.removeEventListener('keydown', stopTimerOnce);
         setTimeout(generateScramble, 300);
       }
     }
 
+    function addTime(time) {
+      times.unshift(time);
+      updateTimes();
+    }
+
+    function updateTimes() {
+      timesList.innerHTML = times.map((t, i) => `<li>${i + 1}. ${t}s</li>`).join('');
+    }
+
     function generateScramble() {
-      const active = enabledCases;
-      const randomCase = active[Math.floor(Math.random() * active.length)];
+      if (enabledCases.length === 0) {
+        scrambleDiv.textContent = "Nenhum caso selecionado.";
+        return;
+      }
+      const randomCase = enabledCases[Math.floor(Math.random() * enabledCases.length)];
       scrambleDiv.textContent = scrambles[randomCase];
     }
 
