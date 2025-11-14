@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Peanut Skewb Timer</title>
+    <style>
+        /* --- 6. Layout Visual & Estilos Globais --- */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'monospace', 'Courier New', Courier;
+            background-color: #000;
+            color: #00ff00;
+            overflow: hidden;
+            user-select: none;
+        }
+
+        /* --- 1. Visão Geral (Layout) --- */
+        .main-container {
+            display: flex;
+            height: 100vh;
+        }
+
+        /* --- 5. Lista de Tempos (Esquerda) --- */
+        .times-section {
+            flex: 0 0 250px; /* Largura fixa para a coluna de tempos */
+            padding: 20px;
+            border-right: 2px solid #00ff00;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .times-section h2 {
+            text-align: center;
+            margin-bottom: 20px;
+            text-shadow: 0 0 5px #00ff00;
+        }
+
+        #times-list {
+            list-style: none;
+            font-size: 1.4rem;
+            /* Os tempos são adicionados no topo via JS (prepend) */
+        }
+
+        #times-list li {
+            margin-bottom: 8px;
+        }
+
+        /* --- 1. & 4. Área do Timer (Centro) --- */
+        .timer-section {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+        }
+
+        #scramble {
+            font-size: 2.2rem;
+            text-align: center;
+            padding: 0 40px;
+            margin-bottom: 50px;
+            line-height: 1.5;
+            text-shadow: 0 0 5px #00ff00;
+        }
+
+        #timer {
+            font-size: 12vw; /* Tamanho fluido */
+            font-weight: bold;
+            text-shadow: 0 0 10px #00ff00;
+        }
+
+        /* Cores de estado do Timer */
+        #timer.red {
+            color: #ff0000;
+            text-shadow: 0 0 10px #ff0000;
+        }
+        #timer.green {
+            color: #00ff00;
+            text-shadow: 0 0 10px #00ff00;
+        }
+
+        /* --- 3. Sistema de Configuração (Modal) --- */
+        #settings-btn {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            font-size: 2.5rem;
+            background: none;
+            border: none;
+            color: #00ff00;
+            cursor: pointer;
+            text-shadow: 0 0 5px #00ff00;
+        }
+        #settings-btn:hover {
+            opacity: 0.7;
+        }
+
+        .modal {
+            display: none; 
+            position: fixed;
+            z-index: 10;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background-color: #0a0a0a;
+            padding: 30px;
+            border: 2px solid #00ff00;
+            box-shadow: 0 0 15px #00ff00;
+            width: 90%;
+            max-width: 500px;
+            position: relative;
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 10px;
+            right: 15px;
+            color: #00ff00;
+            font-size: 2rem;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .close-btn:hover {
+            opacity: 0.7;
+        }
+
+        .modal-content h3 {
+            font-size: 1.8rem;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        #case-list {
+            list-style: none;
+            margin-bottom: 20px;
+        }
+
+        .case-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+            font-size: 1.5rem;
+        }
+
+        .case-item input[type="checkbox"] {
+            /* Estilizando checkboxes para o tema neon */
+            -webkit-appearance: none;
+            appearance: none;
+            background-color: #000;
+            border: 2px solid #00ff00;
+            width: 25px;
+            height: 25px;
+            margin-right: 15px;
+            cursor: pointer;
+            position: relative;
+        }
+        .case-item input[type="checkbox"]:checked {
+            background-color: #00ff00;
+            box-shadow: 0 0 10px #00ff00;
+        }
+        
+        .case-item img {
+            width: 50px;
+            height: 50px;
+            border: 2px solid #00ff00;
+            box-shadow: 0 0 5px #00ff00;
+            margin-right: 15px;
+            background-color: #111; /* Cor de fundo para placeholders */
+        }
+
+        .modal-actions {
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .modal-actions button {
+            font-family: 'monospace', 'Courier New', Courier;
+            background: none;
+            border: 2px solid #00ff00;
+            color: #00ff00;
+            padding: 10px 15px;
+            font-size: 1rem;
+            cursor: pointer;
+            text-shadow: 0 0 5px #00ff00;
+        }
+        .modal-actions button:hover {
+            background: #00ff00;
+            color: #000;
+            box-shadow: 0 0 10px #00ff00;
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="main-container">
+
+        <aside class="times-section">
+            <h2>Tempos</h2>
+            <ol id="times-list">
+                </ol>
+        </aside>
+
+        <main class="timer-section">
+            <button id="settings-btn" title="Configurações">⚙️</button>
+            <div id="scramble">Carregando scramble...</div>
+            <div id="timer">0.00</div>
+        </main>
+    </div>
+
+    <div id="settings-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-btn">&times;</span>
+            <h3>Categoria Peanut</h3>
+            
+            <ul id="case-list">
+                </ul>
+
+            <div class="modal-actions">
+                <button id="select-all">Selecionar tudo</button>
+                <button id="clear-all">Limpar tudo</button>
+            </div>
+        </div>
+    </div>
+
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+
+            // --- 2. Scrambles da Categoria Peanut ---
+            const peanutScrambles = {
+                'U1': "H z (S z S)",
+                'U2': "S z' S z' H",
+                'U3': "H z' S z' S",
+                'U4': "(S z S) z H",
+                'U5': "(H z' H) z' S",
+                'U6': "S z H z H",
+                'U7': "H z H z S",
+                'U8': "S z' (H z' H)"
+            };
+            const caseNames = Object.keys(peanutScrambles);
+
+            // --- Elementos DOM ---
+            const timerDisplay = document.getElementById('timer');
+            const scrambleDisplay = document.getElementById('scramble');
+            const timesList = document.getElementById('times-list');
+            const settingsBtn = document.getElementById('settings-btn');
+            const modal = document.getElementById('settings-modal');
+            const closeModalBtn = document.querySelector('.close-btn');
+            const caseList = document.getElementById('case-list');
+            const selectAllBtn = document.getElementById('select-all');
+            const clearAllBtn = document.getElementById('clear-all');
+
+            // --- Estado do Timer ---
+            let timerRunning = false;
+            let timerReady = false;
+            let timerInspecting = false; // Estado "vermelho"
+            let startTime = 0;
+            let intervalId = null;
+            let holdTimerId = null;
+            let times = [];
+            let selectedCases = [...caseNames]; // Começa com todos selecionados
+
+            // --- 3. Inicialização do Modal ---
+            function setupModal() {
+                caseNames.forEach(caseName => {
+                    const li = document.createElement('li');
+                    li.className = 'case-item';
+                    
+                    const checkbox = document.createElement('input');
+                    checkbox.type = 'checkbox';
+                    checkbox.id = `check-${caseName}`;
+                    checkbox.value = caseName;
+                    checkbox.checked = true; // Começa marcado
+                    
+                    // 8. Observação (IDs de Imagem)
+                    const img = document.createElement('img');
+                    img.id = `img-${caseName}`;
+                    img.src = `placeholder_${caseName}.png`; // Placeholder
+                    img.alt = `Caso ${caseName}`;
+
+                    const label = document.createElement('label');
+                    label.htmlFor = `check-${caseName}`;
+                    label.textContent = caseName;
+
+                    li.appendChild(checkbox);
+                    li.appendChild(img);
+                    li.appendChild(label);
+                    caseList.appendChild(li);
+
+                    // Atualiza a seleção ao mudar checkbox
+                    checkbox.addEventListener('change', updateSelectedCases);
+                });
+
+                // Ações dos botões do modal
+                settingsBtn.addEventListener('click', openModal);
+                closeModalBtn.addEventListener('click', closeModal);
+                window.addEventListener('click', (e) => {
+                    if (e.target === modal) {
+                        closeModal();
+                    }
+                });
+
+                selectAllBtn.addEventListener('click', () => {
+                    document.querySelectorAll('#case-list input[type="checkbox"]').forEach(cb => cb.checked = true);
+                    updateSelectedCases();
+                });
+
+                clearAllBtn.addEventListener('click', () => {
+                    document.querySelectorAll('#case-list input[type="checkbox"]').forEach(cb => cb.checked = false);
+                    updateSelectedCases();
+                });
+            }
+
+            function openModal() {
+                modal.style.display = 'flex';
+            }
+
+            function closeModal() {
+                modal.style.display = 'none';
+                // Garante que um scramble seja gerado se o usuário limpou tudo e fechou
+                if (selectedCases.length === 0) {
+                    scrambleDisplay.textContent = "Selecione ao menos um caso nas configurações (⚙️)!";
+                } else {
+                    generateScramble();
+                }
+            }
+
+            // Atualiza o array 'selectedCases' com base nos checkboxes
+            function updateSelectedCases() {
+                selectedCases = [];
+                document.querySelectorAll('#case-list input[type="checkbox"]:checked').forEach(cb => {
+                    selectedCases.push(cb.value);
+                });
+            }
+
+            // --- 2. & 3. Geração de Scrambles ---
+            function generateScramble() {
+                if (selectedCases.length === 0) {
+                    scrambleDisplay.textContent = "Nenhum caso selecionado!";
+                    return;
+                }
+                
+                // Sorteia um caso do array de casos selecionados
+                const randomCase = selectedCases[Math.floor(Math.random() * selectedCases.length)];
+                scrambleDisplay.textContent = peanutScrambles[randomCase];
+            }
+
+            // --- 4. Funcionalidade do Timer ---
+
+            function formatTime(ms) {
+                const totalSeconds = ms / 1000;
+                const seconds = Math.floor(totalSeconds);
+                const hundredths = Math.floor((totalSeconds - seconds) * 100);
+                return `${seconds}.${hundredths.toString().padStart(2, '0')}`;
+            }
+
+            function updateTimerDisplay() {
+                const elapsedTime = Date.now() - startTime;
+                timerDisplay.textContent = formatTime(elapsedTime);
+            }
+
+            function startTimer() {
+                if (timerRunning) return;
+                
+                timerRunning = true;
+                timerReady = false;
+                timerInspecting = false;
+                timerDisplay.classList.remove('red', 'green');
+                
+                startTime = Date.now();
+                timerDisplay.textContent = "0.00"; // Reseta visualmente
+                intervalId = setInterval(updateTimerDisplay, 10); // Atualiza rápido
+            }
+
+            function stopTimer() {
+                if (!timerRunning) return;
+
+                timerRunning = false;
+                clearInterval(intervalId);
+                
+                const elapsedTime = Date.now() - startTime;
+                const formattedTime = formatTime(elapsedTime);
+                timerDisplay.textContent = formattedTime;
+
+                // 5. Adiciona tempo à lista
+                addTimeToList(formattedTime);
+                
+                // 1. Gera próximo scramble
+                generateScramble();
+            }
+
+            // --- 5. Lista de Tempos ---
+            function addTimeToList(time) {
+                times.unshift(time); // Adiciona no início (mais recente)
+                
+                // Recria a lista (mais simples do que gerenciar DOM complexo)
+                timesList.innerHTML = "";
+                times.forEach((t, index) => {
+                    const li = document.createElement('li');
+                    li.textContent = `${times.length - index}. ${t}s`;
+                    timesList.appendChild(li); // Adiciona no final (ordem visual)
+                });
+
+                // Invertendo a ordem para exibição (item 1 é o mais recente)
+                const items = Array.from(timesList.children);
+                timesList.innerHTML = "";
+                items.reverse().forEach((item, index) => {
+                     // Ajusta o número do índice para ser (total - index)
+                    item.textContent = `${times.length - index}. ${times[index]}s`;
+                    timesList.appendChild(item);
+                });
+            }
+
+            // --- 4. Gerenciamento de Eventos (Espaço) ---
+            
+            function handleKeyDown(e) {
+                if (e.code !== 'Space' || modal.style.display === 'flex') {
+                    return;
+                }
+                e.preventDefault();
+
+                if (timerRunning) {
+                    stopTimer();
+                    return;
+                }
+
+                if (!timerInspecting && !timerReady) {
+                    timerInspecting = true;
+                    timerDisplay.classList.remove('green');
+                    timerDisplay.classList.add('red');
+                    
+                    // Delay de 1 segundo (requisito)
+                    holdTimerId = setTimeout(() => {
+                        if (timerInspecting) { // Se ainda estiver segurando
+                            timerReady = true;
+                            timerDisplay.classList.remove('red');
+                            timerDisplay.classList.add('green');
+                        }
+                    }, 1000); // 1 segundo de hold
+                }
+            }
+
+            function handleKeyUp(e) {
+                if (e.code !== 'Space' || modal.style.display === 'flex') {
+                    return;
+                }
+                e.preventDefault();
+
+                if (timerRunning) {
+                    return; // KeyUp não faz nada se o timer está correndo
+                }
+
+                clearTimeout(holdTimerId);
+                timerInspecting = false;
+
+                if (timerReady) {
+                    // Estava verde, começa o timer
+                    startTimer();
+                } else {
+                    // Soltou antes de ficar verde
+                    timerDisplay.classList.remove('red', 'green');
+                }
+            }
+
+            // --- Inicialização ---
+            window.addEventListener('keydown', handleKeyDown);
+            window.addEventListener('keyup', handleKeyUp);
+            
+            setupModal();
+            generateScramble(); // Gera o primeiro scramble ao carregar
+
+        });
+    </script>
+
+</body>
+</html>
