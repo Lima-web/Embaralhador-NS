@@ -45,7 +45,6 @@
         #times-list {
             list-style: none;
             font-size: 1.4rem;
-            /* Os tempos são adicionados no topo via JS (prepend) */
         }
 
         #times-list li {
@@ -63,7 +62,7 @@
         }
 
         #scramble {
-            font-size: 2.2rem;
+            font-size: 2rem; /* Reduzido ligeiramente para scrambles longos */
             text-align: center;
             padding: 0 40px;
             margin-bottom: 50px;
@@ -87,7 +86,7 @@
             text-shadow: 0 0 10px #00ff00;
         }
 
-        /* --- 3. Sistema de Configuração (Modal) --- */
+        /* --- 3. Sistema de Configuração (Modal) - Estilo de Grade de Texto --- */
         #settings-btn {
             position: absolute;
             top: 20px;
@@ -114,91 +113,124 @@
             background-color: rgba(0, 0, 0, 0.7);
             justify-content: center;
             align-items: center;
+            overflow-y: auto; 
         }
 
         .modal-content {
             background-color: #0a0a0a;
-            padding: 30px;
+            padding: 20px;
             border: 2px solid #00ff00;
             box-shadow: 0 0 15px #00ff00;
-            width: 90%;
-            max-width: 500px;
+            width: 95%; 
+            max-width: 900px; 
             position: relative;
-        }
-
-        .close-btn {
-            position: absolute;
-            top: 10px;
-            right: 15px;
-            color: #00ff00;
-            font-size: 2rem;
-            font-weight: bold;
-            cursor: pointer;
-        }
-        .close-btn:hover {
-            opacity: 0.7;
+            margin: 20px auto; 
+            max-height: 90vh; 
+            overflow-y: auto;
         }
 
         .modal-content h3 {
-            font-size: 1.8rem;
-            margin-bottom: 20px;
+            font-size: 2rem;
+            margin-bottom: 25px;
             text-align: center;
+            text-shadow: 0 0 8px #00ff00;
         }
 
-        #case-list {
+        /* Container para um grupo de casos */
+        .case-group {
+            margin-bottom: 30px;
+            border: 1px solid rgba(0, 255, 0, 0.3); 
+            padding: 15px;
+        }
+
+        .case-group-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 5px;
+            border-bottom: 1px dashed rgba(0, 255, 0, 0.5);
+        }
+
+        .case-group-header h4 {
+            font-size: 1.4rem;
+            color: #00ff00;
+        }
+
+        .case-group-actions button {
+            font-family: 'monospace', 'Courier New', Courier;
+            background: none;
+            border: none;
+            color: #00ff00;
+            padding: 5px 8px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            text-shadow: 0 0 3px #00ff00;
+        }
+        .case-group-actions button:hover {
+            opacity: 0.8;
+            text-decoration: underline;
+        }
+
+        /* Grid para os itens dos casos */
+        .case-list-grid {
+            display: grid;
+            /* Ajustado para caber nomes de casos */
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); 
+            gap: 10px; 
             list-style: none;
-            margin-bottom: 20px;
         }
 
         .case-item {
             display: flex;
+            flex-direction: row; /* Checkbox ao lado do texto */
             align-items: center;
-            margin-bottom: 15px;
-            font-size: 1.5rem;
+            position: relative;
+            padding: 8px;
+            border: 1px solid rgba(0, 255, 0, 0.2);
+            gap: 10px;
         }
 
         .case-item input[type="checkbox"] {
-            /* Estilizando checkboxes para o tema neon */
             -webkit-appearance: none;
             appearance: none;
             background-color: #000;
             border: 2px solid #00ff00;
-            width: 25px;
-            height: 25px;
-            margin-right: 15px;
+            width: 20px;
+            height: 20px;
             cursor: pointer;
-            position: relative;
+            position: static; /* Removido absolute */
+            flex-shrink: 0; /* Impede que o checkbox encolha */
         }
         .case-item input[type="checkbox"]:checked {
             background-color: #00ff00;
-            box-shadow: 0 0 10px #00ff00;
+            box-shadow: 0 0 5px #00ff00;
         }
         
-        .case-item img {
-            width: 50px;
-            height: 50px;
-            border: 2px solid #00ff00;
-            box-shadow: 0 0 5px #00ff00;
-            margin-right: 15px;
-            background-color: #111; /* Cor de fundo para placeholders */
+        .case-item label {
+            font-size: 1.1rem; /* Tamanho de fonte para o nome do caso */
+            cursor: pointer;
+            color: #00ff00;
+            text-shadow: 0 0 3px #00ff00;
         }
 
-        .modal-actions {
+        .modal-footer {
             display: flex;
-            justify-content: space-between;
+            justify-content: center; /* Centraliza o botão OK */
+            margin-top: 30px;
         }
 
-        .modal-actions button {
+        #modal-ok-btn {
             font-family: 'monospace', 'Courier New', Courier;
             background: none;
             border: 2px solid #00ff00;
             color: #00ff00;
-            padding: 10px 15px;
-            font-size: 1rem;
+            padding: 12px 25px;
+            font-size: 1.2rem;
             cursor: pointer;
             text-shadow: 0 0 5px #00ff00;
         }
-        .modal-actions button:hover {
+        #modal-ok-btn:hover {
             background: #00ff00;
             color: #000;
             box-shadow: 0 0 10px #00ff00;
@@ -225,15 +257,46 @@
 
     <div id="settings-modal" class="modal">
         <div class="modal-content">
-            <span class="close-btn">&times;</span>
-            <h3>Categoria Peanut</h3>
+            <h3>Scramble Options</h3>
             
-            <ul id="case-list">
-                </ul>
+            <div class="case-group" id="peanut-cases-group">
+                <div class="case-group-header">
+                    <h4>Categoria Peanut</h4>
+                    <div class="case-group-actions">
+                        <button class="select-all-group" data-group="Peanut">Full</button> | 
+                        <button class="clear-all-group" data-group="Peanut">Clear</button>
+                    </div>
+                </div>
+                <ul id="peanut-case-list" class="case-list-grid">
+                    </ul>
+            </div>
 
-            <div class="modal-actions">
-                <button id="select-all">Selecionar tudo</button>
-                <button id="clear-all">Limpar tudo</button>
+            <div class="case-group" id="pi-fl-cases-group">
+                <div class="case-group-header">
+                    <h4>Pi - FL</h4>
+                    <div class="case-group-actions">
+                        <button class="select-all-group" data-group="Pi - FL">Full</button> | 
+                        <button class="clear-all-group" data-group="Pi - FL">Clear</button>
+                    </div>
+                </div>
+                <ul id="pi-fl-case-list" class="case-list-grid">
+                    </ul>
+            </div>
+
+            <div class="case-group" id="pi-br-cases-group">
+                <div class="case-group-header">
+                    <h4>Pi - BR</h4>
+                    <div class="case-group-actions">
+                        <button class="select-all-group" data-group="Pi - BR">Full</button> | 
+                        <button class="clear-all-group" data-group="Pi - BR">Clear</button>
+                    </div>
+                </div>
+                <ul id="pi-br-case-list" class="case-list-grid">
+                    </ul>
+            </div>
+
+            <div class="modal-footer">
+                <button id="modal-ok-btn">Ok</button>
             </div>
         </div>
     </div>
@@ -242,18 +305,47 @@
     <script>
         document.addEventListener('DOMContentLoaded', () => {
 
-            // --- 2. Scrambles da Categoria Peanut ---
-            const peanutScrambles = {
-                'U1': "H z (S z S)",
-                'U2': "S z' S z' H",
-                'U3': "H z' S z' S",
-                'U4': "(S z S) z H",
-                'U5': "(H z' H) z' S",
-                'U6': "S z H z H",
-                'U7': "H z H z S",
-                'U8': "S z' (H z' H)"
+            // --- 2. Nova Estrutura de Scrambles ---
+            const allScrambleGroups = {
+                'Peanut': {
+                    'U1': "H z (S z S)",
+                    'U2': "S z' S z' H",
+                    'U3': "H z' S z' S",
+                    'U4': "(S z S) z H",
+                    'U5': "(H z' H) z' S",
+                    'U6': "S z H z H",
+                    'U7': "H z H z S",
+                    'U8': "S z' (H z' H)"
+                },
+                'Pi - FL': {
+                    'O1': "H z2 H z' S",
+                    'O2': "H z2 H z H",
+                    'O3': "H H z H z'2 H",
+                    'S1 NS': "H z S z’ S z’ S",
+                    'S2 NS': "H z' H z S z’ H",
+                    'U1': "H z' H z S",
+                    'U2': "H z S z’ S",
+                    'U3 NS': "Triple Sledge",
+                    'X1 NS': "H H H z' H",
+                    'X2': "S S S z S",
+                    'W1': "S r R r’ z’ r’ R r",
+                    'W2': "H R’ r’ R r R z R r’ R’"
+                },
+                'Pi - BR': {
+                    'O1': "H z2 H z S",
+                    'O2': "H z2 H z’ H",
+                    'O3': "H H z' H z2 H",
+                    'S1': "H z' S z S z' S",
+                    'S2': "S z H z' H z H",
+                    'U1': "H z H z’ S",
+                    'U2': "S z' S z H",
+                    'U3 NS': "Triple Sledge",
+                    'X1': "S S S z’ S",
+                    'X2': "H H H z H",
+                    'W1': "S z S z H z2 S",
+                    'W2': "H z' H z' S z2 H"
+                }
             };
-            const caseNames = Object.keys(peanutScrambles);
 
             // --- Elementos DOM ---
             const timerDisplay = document.getElementById('timer');
@@ -261,104 +353,141 @@
             const timesList = document.getElementById('times-list');
             const settingsBtn = document.getElementById('settings-btn');
             const modal = document.getElementById('settings-modal');
-            const closeModalBtn = document.querySelector('.close-btn');
-            const caseList = document.getElementById('case-list');
-            const selectAllBtn = document.getElementById('select-all');
-            const clearAllBtn = document.getElementById('clear-all');
+            const modalOkBtn = document.getElementById('modal-ok-btn');
+
+            // Listas do Modal
+            const peanutList = document.getElementById('peanut-case-list');
+            const piFlList = document.getElementById('pi-fl-case-list');
+            const piBrList = document.getElementById('pi-br-case-list');
 
             // --- Estado do Timer ---
             let timerRunning = false;
             let timerReady = false;
-            let timerInspecting = false; // Estado "vermelho"
+            let timerInspecting = false; 
             let startTime = 0;
             let intervalId = null;
             let holdTimerId = null;
             let times = [];
-            let selectedCases = [...caseNames]; // Começa com todos selecionados
+            
+            // selectedCases agora guarda objetos para saber o grupo
+            let selectedCases = []; 
 
-            // --- 3. Inicialização do Modal ---
-            function setupModal() {
-                caseNames.forEach(caseName => {
+            // --- 3. Inicialização do Modal (com múltiplos grupos) ---
+
+            // Função helper para popular uma lista de casos
+            function populateCaseList(listElement, groupName, cases) {
+                for (const caseName in cases) {
                     const li = document.createElement('li');
                     li.className = 'case-item';
                     
                     const checkbox = document.createElement('input');
                     checkbox.type = 'checkbox';
-                    checkbox.id = `check-${caseName}`;
+                    checkbox.id = `check-${groupName}-${caseName}`;
                     checkbox.value = caseName;
+                    checkbox.dataset.group = groupName; // Guarda o grupo no checkbox
                     checkbox.checked = true; // Começa marcado
                     
-                    // 8. Observação (IDs de Imagem)
-                    const img = document.createElement('img');
-                    img.id = `img-${caseName}`;
-                    img.src = `placeholder_${caseName}.png`; // Placeholder
-                    img.alt = `Caso ${caseName}`;
-
                     const label = document.createElement('label');
-                    label.htmlFor = `check-${caseName}`;
+                    label.htmlFor = `check-${groupName}-${caseName}`;
                     label.textContent = caseName;
 
                     li.appendChild(checkbox);
-                    li.appendChild(img);
                     li.appendChild(label);
-                    caseList.appendChild(li);
+                    listElement.appendChild(li);
+                }
+            }
 
-                    // Atualiza a seleção ao mudar checkbox
-                    checkbox.addEventListener('change', updateSelectedCases);
-                });
+            // Função para preencher 'selectedCases' com tudo selecionado
+            function initializeSelectedCases() {
+                selectedCases = [];
+                for (const groupName in allScrambleGroups) {
+                    for (const caseName in allScrambleGroups[groupName]) {
+                        selectedCases.push({
+                            group: groupName,
+                            caseName: caseName
+                        });
+                    }
+                }
+            }
+            
+            function setupModal() {
+                // Popula as 3 listas
+                populateCaseList(peanutList, 'Peanut', allScrambleGroups.Peanut);
+                populateCaseList(piFlList, 'Pi - FL', allScrambleGroups['Pi - FL']);
+                populateCaseList(piBrList, 'Pi - BR', allScrambleGroups['Pi - BR']);
 
                 // Ações dos botões do modal
                 settingsBtn.addEventListener('click', openModal);
-                closeModalBtn.addEventListener('click', closeModal);
+                modalOkBtn.addEventListener('click', () => {
+                    updateSelectedCases(); // Salva as mudanças
+                    closeModal();
+                    generateScramble(); // Gera novo scramble com base na seleção
+                });
+                
                 window.addEventListener('click', (e) => {
                     if (e.target === modal) {
-                        closeModal();
+                        closeModal(); // Fecha sem salvar
                     }
                 });
 
-                selectAllBtn.addEventListener('click', () => {
-                    document.querySelectorAll('#case-list input[type="checkbox"]').forEach(cb => cb.checked = true);
-                    updateSelectedCases();
+                // Botões Full (Selecionar Todos)
+                document.querySelectorAll('.select-all-group').forEach(button => {
+                    button.addEventListener('click', () => {
+                        const group = button.dataset.group;
+                        document.querySelectorAll(`input[data-group="${group}"]`).forEach(cb => cb.checked = true);
+                    });
                 });
 
-                clearAllBtn.addEventListener('click', () => {
-                    document.querySelectorAll('#case-list input[type="checkbox"]').forEach(cb => cb.checked = false);
-                    updateSelectedCases();
+                // Botões Clear (Limpar Todos)
+                document.querySelectorAll('.clear-all-group').forEach(button => {
+                    button.addEventListener('click', () => {
+                        const group = button.dataset.group;
+                        document.querySelectorAll(`input[data-group="${group}"]`).forEach(cb => cb.checked = false);
+                    });
                 });
             }
 
             function openModal() {
                 modal.style.display = 'flex';
+                // Garante que o estado dos checkboxes reflita 'selectedCases'
+                // 1. Desmarca todos
+                document.querySelectorAll('#settings-modal input[type="checkbox"]').forEach(cb => cb.checked = false);
+                // 2. Marca apenas os selecionados
+                selectedCases.forEach(caseObj => {
+                    const cb = document.querySelector(`input[data-group="${caseObj.group}"][value="${caseObj.caseName}"]`);
+                    if (cb) cb.checked = true;
+                });
             }
 
             function closeModal() {
                 modal.style.display = 'none';
-                // Garante que um scramble seja gerado se o usuário limpou tudo e fechou
-                if (selectedCases.length === 0) {
-                    scrambleDisplay.textContent = "Selecione ao menos um caso nas configurações (⚙️)!";
-                } else {
-                    generateScramble();
-                }
             }
 
             // Atualiza o array 'selectedCases' com base nos checkboxes
             function updateSelectedCases() {
                 selectedCases = [];
-                document.querySelectorAll('#case-list input[type="checkbox"]:checked').forEach(cb => {
-                    selectedCases.push(cb.value);
+                document.querySelectorAll('#settings-modal input[type="checkbox"]:checked').forEach(cb => {
+                    selectedCases.push({
+                        group: cb.dataset.group,
+                        caseName: cb.value
+                    });
                 });
             }
 
             // --- 2. & 3. Geração de Scrambles ---
             function generateScramble() {
                 if (selectedCases.length === 0) {
-                    scrambleDisplay.textContent = "Nenhum caso selecionado!";
+                    scrambleDisplay.textContent = "Nenhum caso selecionado! (⚙️)";
                     return;
                 }
                 
                 // Sorteia um caso do array de casos selecionados
-                const randomCase = selectedCases[Math.floor(Math.random() * selectedCases.length)];
-                scrambleDisplay.textContent = peanutScrambles[randomCase];
+                const randomCaseObj = selectedCases[Math.floor(Math.random() * selectedCases.length)];
+                
+                // Busca o scramble usando o grupo e o nome do caso
+                const scramble = allScrambleGroups[randomCaseObj.group][randomCaseObj.caseName];
+                
+                scrambleDisplay.textContent = scramble;
             }
 
             // --- 4. Funcionalidade do Timer ---
@@ -384,8 +513,8 @@
                 timerDisplay.classList.remove('red', 'green');
                 
                 startTime = Date.now();
-                timerDisplay.textContent = "0.00"; // Reseta visualmente
-                intervalId = setInterval(updateTimerDisplay, 10); // Atualiza rápido
+                timerDisplay.textContent = "0.00"; 
+                intervalId = setInterval(updateTimerDisplay, 10); 
             }
 
             function stopTimer() {
@@ -398,10 +527,7 @@
                 const formattedTime = formatTime(elapsedTime);
                 timerDisplay.textContent = formattedTime;
 
-                // 5. Adiciona tempo à lista
                 addTimeToList(formattedTime);
-                
-                // 1. Gera próximo scramble
                 generateScramble();
             }
 
@@ -409,19 +535,17 @@
             function addTimeToList(time) {
                 times.unshift(time); // Adiciona no início (mais recente)
                 
-                // Recria a lista (mais simples do que gerenciar DOM complexo)
                 timesList.innerHTML = "";
                 times.forEach((t, index) => {
                     const li = document.createElement('li');
                     li.textContent = `${times.length - index}. ${t}s`;
-                    timesList.appendChild(li); // Adiciona no final (ordem visual)
+                    timesList.appendChild(li); 
                 });
 
-                // Invertendo a ordem para exibição (item 1 é o mais recente)
+                // Invertendo a ordem para exibição
                 const items = Array.from(timesList.children);
                 timesList.innerHTML = "";
                 items.reverse().forEach((item, index) => {
-                     // Ajusta o número do índice para ser (total - index)
                     item.textContent = `${times.length - index}. ${times[index]}s`;
                     timesList.appendChild(item);
                 });
@@ -445,14 +569,13 @@
                     timerDisplay.classList.remove('green');
                     timerDisplay.classList.add('red');
                     
-                    // Delay de 1 segundo (requisito)
                     holdTimerId = setTimeout(() => {
-                        if (timerInspecting) { // Se ainda estiver segurando
+                        if (timerInspecting) { 
                             timerReady = true;
                             timerDisplay.classList.remove('red');
                             timerDisplay.classList.add('green');
                         }
-                    }, 1000); // 1 segundo de hold
+                    }, 1000); // 1 segundo
                 }
             }
 
@@ -463,26 +586,26 @@
                 e.preventDefault();
 
                 if (timerRunning) {
-                    return; // KeyUp não faz nada se o timer está correndo
+                    return; 
                 }
 
                 clearTimeout(holdTimerId);
                 timerInspecting = false;
 
                 if (timerReady) {
-                    // Estava verde, começa o timer
                     startTimer();
                 } else {
-                    // Soltou antes de ficar verde
                     timerDisplay.classList.remove('red', 'green');
                 }
             }
 
-            // --- Inicialização ---
+        
             window.addEventListener('keydown', handleKeyDown);
             window.addEventListener('keyup', handleKeyUp);
             
+            // --- Inicialização ---
             setupModal();
+            initializeSelectedCases(); // Começa com todos selecionados
             generateScramble(); // Gera o primeiro scramble ao carregar
 
         });
